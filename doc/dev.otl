@@ -1,0 +1,13 @@
+* goals / design
+	: a guile program that implements a dsl for defining csound synthesizers
+	[_] low level bindings
+		[X] low level rendering of opcodes and instruments with named parameters
+		[_] low level rendering of notes with named parameters
+		[_] low level rendering of csd files
+	[_] high level bindings
+		[_] expressions to generate variants of instruments
+		[_] expressions to elaborate sequences of notes
+		[_] linking instruments via channels, zak, or ftables for modulation
+		[_] expression that generates instrument plus others for modulation
+			: the main instrument uses channels, ftables, or zak space to
+			: read parameters at runtime, modified by other instruments
