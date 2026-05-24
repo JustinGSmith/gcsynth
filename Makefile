@@ -1,8 +1,13 @@
 SRC=src/
 
+FLAGS=--no-auto-compile --debug
+
 gcsynth:
-	guile -L ${SRC} src/gcsynth/gcsynth.scm
+	guile ${FLAGS} -L ${SRC} src/gcsynth/gcsynth.scm
 
 .PHONY: test
 test:
-	guile -L ${SRC} test/gcsynth/gcsynth-test.scm
+	guile ${FLAGS} -L ${SRC} test/gcsynth/gcsynth-test.scm
+
+repl:
+	guile ${FLAGS} -L ${SRC} --
