@@ -2,8 +2,10 @@
    #:use-module (srfi srfi-1)
    #:use-module (srfi srfi-9)
    #:use-module (ice-9 match)
-   #:export (instrument oscil outs render-instrument))
+   #:export (instrument oscil outs render-instrument
+             event render-event))
 
+
 (define-record-type <opcode>
   (opcode name inputs outputs)
   opcode?
@@ -38,6 +40,7 @@
   ;; alist of name (as defined in instrument) to value
   (parameters event-parameters))
 
+
 (define (str x)
   (format #f "~a" x))
 
@@ -94,6 +97,7 @@
                        "	endin")
                  "\n")))
 
+
 (define (sequential-keys assoc-data)
   (match assoc-data
          (()
@@ -140,9 +144,6 @@
     (if (not (sequential-keys sorted-positions))
       (raise-exception
         "keys for fields must be sequential"))
-    ; (format #t "debug: name->position ~s~%" name->position)
-    ; (format #t "debug: sorted-positions ~s~%" sorted-positions)
-    ; (format #t "debug: position->value ~s~%" position->value)
     (match sorted-positions
            (((index . value) ...)
             value))))
@@ -157,3 +158,23 @@
                                    duration))))
            (params (untangle-parameters ins event)))
     (format #f "~a~{ ~a~}" prefix params)))
+
+(define (tag name opts contents)
+  (format "<~a ~a>~%~a~%</~a>"
+          name
+          opts
+          contents
+          name))
+
+(define (csd options orchestra score)
+  (tag "CsoundSynthesizer"
+       ""
+       (tag "CsOptions"
+            ""
+            options)
+       (tag "CsInstruments"
+            ""
+            orchestra)
+       (tag "CsScore"
+            ""
+            score)))
