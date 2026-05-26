@@ -8,7 +8,7 @@
              parameter-defaults
 
              instrument instrument? instrument-number instrument-name
-             instrument-parameters instrument-expression
+             instrument-parameters instrument-expressions
 
              event event? event-instrument event-timing event-parameters))
 

@@ -1,11 +1,29 @@
 (define-module (gcsynth render-test)
   #:use-module ((gcsynth render) #:prefix render:)
   #:use-module ((srfi srfi-64) #:prefix test:)
+  #:use-module ((noisesmith test) #:prefix test-util:)
   #:use-module ((ice-9 regex) #:prefix re:)
+  #:use-module ((srfi srfi-8) #:prefix bind:)
   #:use-module ((gcsynth opcodes) #:prefix opcodes:)
-  #:use-module ((gcsynth instruments) #:prefix orch:)
-  #:use-module ((gcsynth event) #:prefix event:)
   #:use-module ((gcsynth gcsynth) #:prefix gcsynth:))
+
+(define simple-osc
+  (gcsynth:instrument 1
+                      "simple_osc"
+                      (gcsynth:parameters '(((name . iamp) (default . 1))
+                                            ((name . icps) (default . 440))))
+                      `((,opcodes:oscil
+                          ((amp . iamp) (cps . icps))
+                          ((sig . aoscil_sig)))
+                        (,opcodes:outs
+                          ((left . aoscil_sig) (right . aoscil_sig))
+                          ()))))
+
+(define test-event
+  (gcsynth:event simple-osc
+         '(0 10)
+         '((iamp . 0.7)
+           (icps . 8000))))
 
 (test:test-with-runner
   ((test:test-runner-factory))
@@ -14,43 +32,60 @@
 
 
   (define instrument-text
-    (render:instrument orch:simple-osc))
+    (render:instrument simple-osc))
 
   (define instrument-regex
-    (ns-test:space-separated "" "*instr" "+1," "+simple_osc\n"
-                             "*iamp" "+init" "+p4\n"
-                             "*icps" "+init" "+p5\n"
-                             "*oscil_sig" "+oscil" "+iamp," "*icps," "*1\n"
-                             "*outs" "+oscil_sig," "*oscil_sig\n"
-                             "*endin"))
+    (test-util:space-separated "" "*instr" "+1," "+simple_osc\n"
+                               "*iamp" "+init" "+p4\n"
+                               "*icps" "+init" "+p5\n"
+                               "*aoscil_sig" "+oscil" "+iamp," "*icps," "*1\n"
+                               "*outs" "+aoscil_sig," "*aoscil_sig\n"
+                               "*endin"))
 
-  (test-assert
+  (test:test-assert
     (re:string-match
       instrument-regex
       instrument-text))
 
-  (test-end "gcsynth render instrumen test")
+  (test:test-end "gcsynth render instrument test")
+
+  (test:test-begin "gcsynth render event test")
+
+  (define event-text
+    (render:event test-event))
+
+  (bind:receive (success last-match)
+                (test-util:regex-path
+                  '((instr . "i") (instr-id . "1")
+                                  (start-time . "0") (duration . "10")
+                                  (amplitude . "0.7") (cps . "8000"))
+                  event-text)
+                (test:test-assert success)
+                (test:test-assert (not last-match)))
+
+  (test:test-end "gcsynth render event test")
+
+  (test:test-begin "gcsynth render csd test")
+
+  (define csd-text
+    (render:csd
+      '()
+      (list "0dbfs=1"
+            (render:instrument simple-osc))
+      (list "f1 0 16384 10 1"
+            (render:event test-event))))
+
+  (call-with-output-file
+    "test.csd"
+    (lambda (csd-file)
+      (format csd-file csd-text)))
+
+  (test:test-assert
+    (=
+      (system "csound test.csd")
+      0))
+
+  (test:test-end "gcsynth render csd test")
 
   (exit (test:test-runner-fail-count (test:test-runner-get))))
 
-;;
-;; 
-;; (test-begin "event-test")
-;;
-;; (define event-text
-;;   (render:event orch:test-event))
-;;
-;; (format #t "event text:~%~s~%" event-text)
-;;
-;; #!
-;; (bind:receive (success last-match)
-;;          (regex-path
-;;            '((instr . "i") (instr-id . "1")
-;;              (start-time . "0") (duration . "10")
-;;              (amplitude . "0.7") (cps . "8000"))
-;;            event-text)
-;;    (test-assert success)
-;;    (test-assert (not last-match)))
-;; !#
-;;
-;; (test-end "event-test")

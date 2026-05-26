@@ -2,8 +2,9 @@
 	: a guile program that implements a dsl for defining csound synthesizers
 	[_] low level bindings
 		[X] low level rendering of opcodes and instruments with named parameters
-		[_] low level rendering of notes with named parameters
-		[_] low level rendering of csd files
+		[X] low level rendering of notes with named parameters
+		[X] low level rendering of csd files
+			: unit test now verifies csound creates audio from the csd
 	[_] high level bindings
 		[_] expressions to generate variants of instruments
 		[_] expressions to elaborate sequences of notes

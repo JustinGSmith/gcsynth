@@ -14,17 +14,14 @@ gcsynth-test:
 opcodes-test:
 	guile ${FLAGS} -L ${SRC} test/gcsynth/opcodes-test.scm
 
-instruments-test:
-	guile ${FLAGS} -L ${SRC} test/gcsynth/instruments-test.scm
-
-event-test:
-	guile ${FLAGS} -L ${SRC} test/gcsynth/event-test.scm
-
 render-test:
 	guile ${FLAGS} -L ${SRC} test/gcsynth/render-test.scm
 
 .PHONY: test
-test: util-test gcsynth-test opcodes-test instruments-test event-test render-test
+test: util-test gcsynth-test opcodes-test render-test
 
 repl:
 	guile ${FLAGS} -L ${SRC} --
+
+clean:
+	rm -f test.csd test.aif
