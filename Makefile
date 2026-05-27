@@ -21,7 +21,7 @@ render-test:
 test: util-test gcsynth-test opcodes-test render-test
 
 repl:
-	guile ${FLAGS} -L ${SRC} --
+	guile ${FLAGS} -L ${SRC} -L . --
 
 clean:
 	rm -f test.csd test.aif

@@ -5,7 +5,8 @@
   #:use-module ((ice-9 regex) #:prefix re:)
   #:use-module ((srfi srfi-8) #:prefix bind:)
   #:use-module ((gcsynth opcodes) #:prefix opcodes:)
-  #:use-module ((gcsynth gcsynth) #:prefix gcsynth:))
+  #:use-module ((gcsynth gcsynth) #:prefix gcsynth:)
+  #:use-module ((gcsynth ftables) #:prefix ftables:))
 
 (define simple-osc
   (gcsynth:instrument 1
@@ -18,6 +19,9 @@
                         (,opcodes:outs
                           ((left . aoscil_sig) (right . aoscil_sig))
                           ()))))
+
+(define test-ftable
+  (gcsynth:ftable  1 0 16384 10 '(1)))
 
 (define test-event
   (gcsynth:event simple-osc
@@ -65,15 +69,41 @@
 
   (test:test-end "gcsynth render event test")
 
+  (test:test-begin "gcsynth render ftable test")
+
+  (define ft
+    (ftables:sine-sum-phase 1 32768
+                            #:partials '((#:pn 1) (#:pn 1.3) (#:pn 1.8))))
+
+  (define ft-string (render:ftable ft))
+
+  (test:test-assert
+    (equal? "f1 0 32768 9 1 1 0 1.3 1 0 1.8 1 0"
+            ft-string))
+
+  (test:test-end "gcsynth render ftable test")
+
   (test:test-begin "gcsynth render csd test")
 
-  (define csd-text
+  (define csd-text-strings
     (render:csd
       '()
       (list "0dbfs=1"
             (render:instrument simple-osc))
       (list "f1 0 16384 10 1"
             (render:event test-event))))
+
+  (define csd-text
+    (render:csd
+      '()
+      (list "0dbfs=1"
+            simple-osc)
+      (list test-ftable
+            test-event)))
+
+  ;; csd can take data structures or strings interchangibly as needed
+  (test:test-assert
+    (equal? csd-text-strings csd-text))
 
   (call-with-output-file
     "test.csd"
@@ -88,4 +118,3 @@
   (test:test-end "gcsynth render csd test")
 
   (exit (test:test-runner-fail-count (test:test-runner-get))))
-

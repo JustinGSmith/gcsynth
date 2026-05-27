@@ -3,7 +3,7 @@
   #:use-module ((gcsynth opcodes) #:prefix opcode:)
   #:use-module ((noisesmith util) #:prefix util:)
   #:use-module (ice-9 match)
-  #:export (opcode instrument event csd))
+  #:export (opcode instrument event ftable csd))
 
 
 (define (opcode opcode inputs outputs)
@@ -58,26 +58,52 @@
                       defaults)))
     (format #f "~a~{ ~a~}" prefix params)))
 
+(define (ftable ft)
+  (format #f "f~a ~a ~a ~a~{ ~a~}"
+          (gcsynth:ftable-table-id ft)
+          (gcsynth:ftable-time ft)
+          (gcsynth:ftable-size ft)
+          (gcsynth:ftable-function-id ft)
+          (gcsynth:ftable-params ft)))
+
 (define (tag name opts contents)
   (format #f "<~a>~%~a~%</~a>"
           (string-join (cons name opts) " ")
           (string-join contents "\n\n")
           name))
 
-;; TODO - ftable rendering
+(define (options-section options)
+  (map (match-lambda
+         ((? string? s) s))
+       options))
+
+(define (orchestra-section orc)
+  (pk "orchestra" orc)
+  (map (match-lambda
+         ((? string? s) s)
+         ((? gcsynth:instrument? ins) (instrument ins)))
+       orc))
+
+(define (score-section sco)
+  (map (match-lambda
+         ((? string? s) s)
+         ((? gcsynth:ftable? ft) (ftable ft))
+         ((? gcsynth:event? evt) (event evt)))
+       sco))
 
 ;; TODO - get and uniquify instruments from events
 (define (csd options orchestra score)
   (tag "CsoundSynthesizer"
-       '("")
+       '()
        (list
          (tag "CsOptions"
               '()
-              options)
+              (options-section options))
          (tag "CsInstruments"
               '()
-              orchestra)
+              (orchestra-section orchestra))
          (tag "CsScore"
               '()
-              (append score
-                      '("e"))))))
+              (score-section
+                (append score
+                        '("e")))))))

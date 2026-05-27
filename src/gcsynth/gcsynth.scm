@@ -10,7 +10,10 @@
              instrument instrument? instrument-number instrument-name
              instrument-parameters instrument-expressions
 
-             event event? event-instrument event-timing event-parameters))
+             event event? event-instrument event-timing event-parameters
+
+             ftable ftable? ftable-table-id ftable-time ftable-size
+             ftable-function-id ftable-params))
 
 (rec:define-record-type <opcode>
   (opcode name inputs outputs)
@@ -68,3 +71,12 @@
   (timing event-timing)
   ;; alist of name (as defined in instrument) to value
   (parameters event-parameters))
+
+(rec:define-record-type <ftable>
+  (ftable table-id time size function-id params)
+  ftable?
+  (table-id ftable-table-id)
+  (time ftable-time)
+  (size ftable-size)
+  (function-id ftable-function-id)
+  (params ftable-params))
