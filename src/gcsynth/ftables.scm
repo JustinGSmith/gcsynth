@@ -4,9 +4,14 @@
    #:use-module ((srfi srfi-1) #:prefix list:)
    #:export (name->table-id
              polynomial
+             sine-sum
+             powtwo
              sine-sum-phase))
 
 (import (rnrs base))
+
+(define (powtwo n)
+  (expt 2 n))
 
 (define name->table-id
   '((file . 1)
@@ -62,3 +67,10 @@
        "#:partials key is mandatory"))
    (gcsynth:ftable table-id time size (assoc-ref name->table-id 'sine-sum-phase)
                    (list:append-map unfold-partial partials))))
+
+(define (sine-sum table-id size . key-args)
+  (opt:let-keywords key-args #f
+    ((time 0)
+     (partials '(1)))
+    (gcsynth:ftable table-id time size (assoc-ref name->table-id 'sine-sum)
+                    partials)))

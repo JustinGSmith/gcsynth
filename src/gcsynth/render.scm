@@ -3,17 +3,18 @@
   #:use-module ((gcsynth opcodes) #:prefix opcode:)
   #:use-module ((noisesmith util) #:prefix util:)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 format)
   #:export (opcode instrument event ftable csd))
 
 
-(define (opcode opcode inputs outputs)
+(define (opcode op inputs outputs)
   (format #f "~a	~a	~a"
           (util:commas (opcode:get-params
-                         (gcsynth:opcode-outputs opcode)
+                         (gcsynth:opcode-outputs op)
                          outputs))
-          (gcsynth:opcode-name opcode)
+          (gcsynth:opcode-name op)
           (util:commas (opcode:get-params
-                         (gcsynth:opcode-inputs opcode)
+                         (gcsynth:opcode-inputs op)
                          inputs))))
 
 (define (instrument ins)
@@ -78,7 +79,6 @@
        options))
 
 (define (orchestra-section orc)
-  (pk "orchestra" orc)
   (map (match-lambda
          ((? string? s) s)
          ((? gcsynth:instrument? ins) (instrument ins)))

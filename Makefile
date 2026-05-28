@@ -2,6 +2,9 @@ SRC=src/
 
 FLAGS=--no-auto-compile --debug
 
+basics-1.wav: src/composition/basics-1.scm
+	guile ${FLAGS} -L src src/composition/basics-1.scm > basics-1.csd
+	csound basics-1.csd
 gcsynth:
 	guile ${FLAGS} -L ${SRC} src/gcsynth/gcsynth.scm
 
